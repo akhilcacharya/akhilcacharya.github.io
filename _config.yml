@@ -1,0 +1,12 @@
+# Site settings
+title: Akhil Acharya
+email: akhilcacharya@gmail.com
+description: > # this means to ignore newlines until "baseurl:"
+  I like to build cool things with smart people.
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://akhilcacharya.me" # the base hostname & protocol for your site
+twitter_username: akhilcacharya
+github_username:  akhilcacharya
+
+# Build settings
+markdown: kramdown

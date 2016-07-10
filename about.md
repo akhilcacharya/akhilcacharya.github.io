@@ -5,11 +5,11 @@ permalink: /about/
 published: true
 ---
 
-##Who am I?
+## Who am I?
 
 Hi, I'm Akhil. I like building things. 
 
 I love learning about mobile development, machine learning, computer vision, and distributed systems.
 
-##Stack
+## Stack
 This site has been generated using [Jekyll](http://jekyllrb.com/) and hosted on GitHub Pages. The source code can be found [here](https://github.com/akhilcacharya/akhilcacharya.github.io)

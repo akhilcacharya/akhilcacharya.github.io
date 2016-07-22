@@ -1,5 +1,8 @@
 ---
-published: false
+published: true
+layout: post
+date: 2016-07-21T18:33:53.000Z
+categories: jekyll update
 ---
 Since buying Amazon Prime a few months ago I've been entranced by the video player's "X-Ray" feature, which presents an overlay of actors and contextual information relevant to the current scene. While this feature isn't Prime specific - Google Play Movies/TV has a similar feature - I've been interested in having a similar system for arbitrary web videos.  
 
@@ -108,5 +111,4 @@ I tested my initial implementation with an abbreviated version of the Microsoft 
 
 Next, I’d like to swap out the Eigenface classification with a more robust CNN to hopefully get the accuracy up to the 70’s or 80s. 
 
-Stay tuned! Full source may be found [here](https://github.com/akhilcacharya/YRay). 
-
+Stay tuned! Full source may be found [here](https://github.com/akhilcacharya/YRay).

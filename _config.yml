@@ -9,4 +9,4 @@ github_username:  akhilcacharya
 
 # Build settings
 markdown: kramdown
-highlighter: rouge
+highlighter: redcarpet

@@ -7,7 +7,7 @@ published: true
 
 ## Who am I?
 
-Hi, I'm Akhil. I like building things. 
+Hi, I'm Akhil.
 
 I love learning about mobile development, machine learning, computer vision, and distributed systems.
 

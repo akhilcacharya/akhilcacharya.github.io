@@ -1,7 +1,7 @@
 ---
 published: true
 layout: post
-date: {}
+date: null
 categories: jekyll update
 ---
 Since buying Amazon Prime a few months ago I've been entranced by the video player's "X-Ray" feature, which presents an overlay of actors and contextual information relevant to the current scene. While this feature isn't Prime specific - Google Play Movies/TV has a similar feature - I've been interested in having a similar system for arbitrary web videos.

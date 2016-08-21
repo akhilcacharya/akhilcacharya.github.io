@@ -1,7 +1,7 @@
 ---
 published: true
 layout: post
-date: 2016-07-21 12:09:42
+date: {}
 categories: jekyll update
 ---
 Since buying Amazon Prime a few months ago I've been entranced by the video player's "X-Ray" feature, which presents an overlay of actors and contextual information relevant to the current scene. While this feature isn't Prime specific - Google Play Movies/TV has a similar feature - I've been interested in having a similar system for arbitrary web videos.
@@ -23,7 +23,7 @@ These previously computed features are generally stored in XML files, where they
 
 Utilizing the Haar Classifier is straightforward:
 
-```python
+```
 import cv2
 CASCADE_XML = "haarcascade_frontalface_default.xml"
 # Initialize cascade classifier
@@ -70,7 +70,7 @@ There are a handful of straightforward facial recognition systems built into Ope
 
 Since this is just a demo, I wrote a function to train faces on the Eigenface recognizer given an array of face tuples. I included code divide the current dataset into train and test subsets and test the accuracy of the system in the same function.
 
-```python
+```
 recognizer = cv2.createEigenFaceRecognizer()
 def train_faces(face_tuples):
     # Decompose tuple list into arrays of images (X) & arrays of labels (Y)

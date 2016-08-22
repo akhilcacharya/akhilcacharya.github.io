@@ -10,5 +10,9 @@ github_username:  akhilcacharya
 exclude: [vendor]
 
 # Build settings
-markdown: kramdown
 highlighter: rouge
+markdown: kramdown
+kramdown:
+  input: GFM
+  auto_ids: true
+  syntax_highlighter: rouge

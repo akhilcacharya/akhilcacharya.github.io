@@ -2,7 +2,7 @@
 published: true
 layout: post
 title: Analyzing mobile battery data with Jupyter
-date: 2016-09-18T18:33:53.000Z
+date: {}
 categories: projects
 ---
 
@@ -282,8 +282,7 @@ show()
 ```
 
 
-![png](output_8_0.png)
-
+![png](/img/output_8_0.png)
 
 
 Our efforts on /r/OnePlus were far and away the most successful, though more with the PlusOne than the PlusTwo. 
@@ -613,5 +612,4 @@ We can probably glean even more from the data in the future - stay tuned for upd
 The notebook source can be found [here](https://github.com/akhilcacharya/amphours-postmortem) and the hosted notebook on GitHub [here](https://github.com/akhilcacharya/amphours-postmortem/blob/master/Amphours%20Postmortem.ipynb) 
 
 
-![RIP]({{site.baseurl}}/_posts/phone_amphours_rip.PNG)
-
+![RIP](/img/phone_amphours_rip.PNG)

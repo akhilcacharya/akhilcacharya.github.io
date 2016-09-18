@@ -1,11 +1,12 @@
 ---
 published: true
 layout: post
-title: Analyzing some batteries - an Amphours Postmortem
+title: Analyzing mobile battery data with Jupyter
 date: 2016-09-18T18:33:53.000Z
 categories: projects
 ---
-# An Amphours Postmortem
+
+# (Aka, an Amphours postmortem)
 
 I built the backend for Amphours, the first battery benchmark tailored towards real world use. 
 

@@ -2,7 +2,7 @@
 published: false
 layout: post
 title: Analyzing some batteries - an Amphours Postmortem
-date: 2016-09-18T18:33:53.000Z
+date: {}
 categories: projects
 ---
 # An Amphours Postmortem
@@ -612,4 +612,4 @@ We can probably glean even more from the data in the future - stay tuned for upd
 The notebook source can be found [here](https://github.com/akhilcacharya/amphours-postmortem) and the hosted notebook on GitHub [here](https://github.com/akhilcacharya/amphours-postmortem/blob/master/Amphours%20Postmortem.ipynb) 
 
 
-![alt text](/phone_amphours_rip.PNG "RIP")
+![alt text](phone_amphours_rip.PNG "RIP")

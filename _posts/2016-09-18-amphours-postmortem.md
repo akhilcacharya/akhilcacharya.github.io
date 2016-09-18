@@ -1,5 +1,5 @@
 ---
-published: false
+published: true
 layout: post
 title: Analyzing some batteries - an Amphours Postmortem
 date: 2016-09-18T18:33:53.000Z

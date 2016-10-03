@@ -4,9 +4,6 @@ title: About
 permalink: /about/
 published: true
 ---
-
-## Who am I?
-
 Hi, I'm Akhil.
 
 I love learning about mobile development, machine learning, computer vision, and distributed systems.
@@ -20,5 +17,4 @@ Grab me on:
 
 [GitHub](https://github.com/akhilcacharya) 
 
-[LinkedIn](https://www.linkedin.com/in/akhil-acharya-4629a767) 
-
+[LinkedIn](https://www.linkedin.com/in/akhil-acharya-4629a767)

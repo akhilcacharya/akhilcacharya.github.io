@@ -160,8 +160,6 @@ pre {
     margin-left: auto;
     padding-right: $spacing-unit;
     padding-left: $spacing-unit;
-    background-color: $grey-color; 
-    color: white; 
     @extend %clearfix;
 
     @include media-query($on-laptop) {

@@ -4,6 +4,8 @@
 .site-header {
     border-top: 5px solid #2196F3; //$grey-color-dark;
     border-bottom: 1px solid #2196F3; //$grey-color-light;
+    background-color: $grey-color; 
+    color: white; 
     min-height: 56px;
 
     // Positioning context for the mobile navigation icon

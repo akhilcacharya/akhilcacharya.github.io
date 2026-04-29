@@ -231,10 +231,41 @@
     window.addEventListener('resize', onResize);
     screen.orientation?.addEventListener('change', onResize);
 
+    // --- Color palette for slow cycling ---
+    const torusHues = [0.65, 0.55, 0.75, 0.85];   // indigo → teal → violet → blue
+    const particleHues = [0.12, 0.08, 0.16, 0.05]; // amber → coral → gold → warm white
+    const icoHues = [0.74, 0.82, 0.66, 0.90];      // violet → magenta → blue → pink
+
+    function lerpHue(hues, t) {
+      const len = hues.length;
+      const i = Math.floor(t) % len;
+      const j = (i + 1) % len;
+      const frac = t - Math.floor(t);
+      // Shortest path around the hue circle
+      let diff = hues[j] - hues[i];
+      if (diff > 0.5) diff -= 1;
+      if (diff < -0.5) diff += 1;
+      return ((hues[i] + diff * frac) % 1 + 1) % 1;
+    }
+
+    const colorTemp = new THREE.Color();
+
     // --- Animate ---
     function animate(time) {
       requestAnimationFrame(animate);
       const t = time * 0.001;
+
+      // Slow color cycling — full loop every ~80 seconds
+      const colorT = t * 0.05;
+
+      colorTemp.setHSL(lerpHue(torusHues, colorT), 0.6, 0.55);
+      torusMat.color.copy(colorTemp);
+
+      colorTemp.setHSL(lerpHue(particleHues, colorT * 0.7), 0.5, 0.7);
+      particleMat.color.copy(colorTemp);
+
+      colorTemp.setHSL(lerpHue(icoHues, colorT * 0.9), 0.5, 0.6);
+      icoMat.color.copy(colorTemp);
 
       target.x += (mouse.x - target.x) * 0.02;
       target.y += (mouse.y - target.y) * 0.02;

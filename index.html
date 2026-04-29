@@ -1,21 +1,245 @@
----
-layout: default
-published: true
----
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Akhil Acharya</title>
+  <meta name="description" content="Akhil Acharya — personal site.">
+  <link rel="canonical" href="https://akhilcacharya.me/">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<div class="home">
+    html {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
 
-  <h1 class="page-heading">Posts</h1>
+    body {
+      min-height: 100dvh;
+      background: #0a0a0a;
+      color: #e8e8e8;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
 
-  <ul class="post-list">
-    {% for post in site.posts %}
-      <li>
-        <span class="post-meta">{{ post.date | date: "%b %-d, %Y" }}</span>
+    canvas#bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
 
-        <h2>
-          <a class="post-link" href="{{ post.url | prepend: site.baseurl }}">{{ post.title }}</a>
-        </h2>
-      </li>
-    {% endfor %}
-  </ul>
-</div>
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .container {
+      text-align: center;
+      padding: 2rem;
+      pointer-events: auto;
+    }
+
+    h1 {
+      font-family: 'Space Mono', monospace;
+      font-size: clamp(2rem, 5.5vw, 4rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: #fff;
+      opacity: 0;
+      transform: translateY(16px);
+      animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+      text-shadow: 0 0 40px rgba(255, 255, 255, 0.08);
+    }
+
+    .links {
+      margin-top: 1.6rem;
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(10px);
+      animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+    }
+
+    .links a {
+      color: #555;
+      text-decoration: none;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: lowercase;
+      transition: color 0.3s ease, text-shadow 0.3s ease;
+    }
+
+    .links a:hover {
+      color: #fff;
+      text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+    }
+
+    .dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: #333;
+      align-self: center;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div class="overlay">
+    <div class="container">
+      <h1>Akhil Acharya</h1>
+      <div class="links">
+        <a href="https://github.com/akhilcacharya" target="_blank" rel="noopener">github</a>
+        <span class="dot"></span>
+        <a href="https://linkedin.com/in/akhilcacharya" target="_blank" rel="noopener">linkedin</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+
+    const canvas = document.getElementById('bg');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x0a0a0a);
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x0a0a0a, 0.0008);
+
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 2000);
+    camera.position.set(0, 0, 500);
+
+    // --- Wireframe torus knot ---
+    const torusGeo = new THREE.TorusKnotGeometry(120, 36, 200, 32, 2, 3);
+    const torusMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.06
+    });
+    const torus = new THREE.Mesh(torusGeo, torusMat);
+    scene.add(torus);
+
+    // --- Particle field ---
+    const particleCount = 1200;
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3]     = (Math.random() - 0.5) * 1600;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 1600;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 1600;
+    }
+    const particleGeo = new THREE.BufferGeometry();
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMat = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 1.5,
+      transparent: true,
+      opacity: 0.4,
+      sizeAttenuation: true
+    });
+    const particles = new THREE.Points(particleGeo, particleMat);
+    scene.add(particles);
+
+    // --- Floating wireframe icosahedrons ---
+    const icoGeo = new THREE.IcosahedronGeometry(30, 1);
+    const icoMat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.04
+    });
+    const icos = [];
+    for (let i = 0; i < 5; i++) {
+      const ico = new THREE.Mesh(icoGeo, icoMat);
+      ico.position.set(
+        (Math.random() - 0.5) * 800,
+        (Math.random() - 0.5) * 600,
+        (Math.random() - 0.5) * 400 - 100
+      );
+      ico.scale.setScalar(0.5 + Math.random() * 1.5);
+      ico.userData.rotSpeed = {
+        x: (Math.random() - 0.5) * 0.003,
+        y: (Math.random() - 0.5) * 0.003
+      };
+      scene.add(ico);
+      icos.push(ico);
+    }
+
+    // --- Mouse tracking ---
+    const mouse = { x: 0, y: 0 };
+    const target = { x: 0, y: 0 };
+    document.addEventListener('mousemove', (e) => {
+      mouse.x = (e.clientX / window.innerWidth - 0.5) * 2;
+      mouse.y = (e.clientY / window.innerHeight - 0.5) * 2;
+    });
+
+    // --- Resize ---
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- Animate ---
+    function animate(time) {
+      requestAnimationFrame(animate);
+      const t = time * 0.001;
+
+      target.x += (mouse.x - target.x) * 0.02;
+      target.y += (mouse.y - target.y) * 0.02;
+
+      torus.rotation.x = t * 0.08 + target.y * 0.3;
+      torus.rotation.y = t * 0.12 + target.x * 0.3;
+
+      particles.rotation.y = t * 0.015;
+      particles.rotation.x = t * 0.008;
+
+      for (const ico of icos) {
+        ico.rotation.x += ico.userData.rotSpeed.x;
+        ico.rotation.y += ico.userData.rotSpeed.y;
+      }
+
+      camera.position.x += (target.x * 40 - camera.position.x) * 0.03;
+      camera.position.y += (-target.y * 40 - camera.position.y) * 0.03;
+      camera.lookAt(0, 0, 0);
+
+      renderer.render(scene, camera);
+    }
+    animate(0);
+  </script>
+</body>
+</html>

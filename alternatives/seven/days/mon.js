@@ -34,7 +34,7 @@ export default async function run(stage) {
       .kt .line:nth-child(2) { font-size: min(15vw, 16.5vh); }
       .kt .ch {
         display: inline-block;
-        font-variation-settings: 'opsz' 60, 'wght' 300;
+        font-variation-settings: 'opsz' 90, 'wght' 440;
       }
     </style>
     <div class="kt-wrap">
@@ -51,7 +51,7 @@ export default async function run(stage) {
       s.className = 'ch';
       s.textContent = ch;
       line.appendChild(s);
-      letters.push({ el: s, w: 300, tw: 300, cx: 0, cy: 0 });
+      letters.push({ el: s, w: 440, tw: 440, cx: 0, cy: 0 });
     }
   });
 
@@ -77,14 +77,17 @@ export default async function run(stage) {
 
     letters.forEach((l, i) => {
       if (idle) {
-        l.tw = REDUCED ? 340 : 300 + 260 * (0.5 + 0.5 * Math.sin(t * 1.1 - i * 0.48));
+        // gentle, even breathing around a solid medium weight
+        l.tw = REDUCED ? 460 : 440 + 80 * Math.sin(t * 0.85 - i * 0.4);
       } else {
         const d = Math.hypot(ptr.x - l.cx, ptr.y - l.cy);
         const p = Math.max(0, 1 - d / RADIUS);
-        l.tw = 240 + 660 * (p * p * (3 - 2 * p));
+        // stays a real weight even far from the cursor; never hair-thin
+        l.tw = 380 + 320 * (p * p * (3 - 2 * p));
       }
-      l.w += (l.tw - l.w) * 0.15;
-      const opsz = 30 + (l.w - 100) / 800 * 114;
+      l.w += (l.tw - l.w) * 0.14;
+      // large optical size keeps the serifs solid rather than spidery
+      const opsz = 74 + (l.w - 380) / 320 * 58;
       l.el.style.fontVariationSettings = `'opsz' ${opsz.toFixed(1)}, 'wght' ${l.w.toFixed(0)}`;
     });
   }

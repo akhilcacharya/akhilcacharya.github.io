@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Akhil Acharya</title>
+  <meta name="description" content="Akhil Acharya — software engineer.">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0c0a06;
+      --amber: #ffb454;
+      --amber-dim: #8a6430;
+    }
+
+    body {
+      min-height: 100dvh;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+    }
+
+    canvas#field {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* soft CRT vignette */
+    .vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.55) 100%);
+      z-index: 2;
+    }
+
+    .bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 3;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 0.9rem 1.2rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--amber-dim);
+    }
+
+    .bar .who { color: var(--amber); }
+    .bar .who::after {
+      content: '▮';
+      margin-left: 0.4em;
+      animation: blink 1.1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .bar a {
+      color: var(--amber-dim);
+      text-decoration: none;
+      transition: color 0.2s, text-shadow 0.2s;
+      padding: 0.4rem 0.2rem;
+    }
+    .bar a:hover, .bar a:active {
+      color: var(--amber);
+      text-shadow: 0 0 14px rgba(255, 180, 84, 0.55);
+    }
+    .bar .sep { margin: 0 0.5em; opacity: 0.5; }
+
+    .hint {
+      position: fixed;
+      top: 1rem;
+      right: 1.2rem;
+      z-index: 3;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      color: var(--amber-dim);
+      opacity: 0.7;
+    }
+
+    @media (max-width: 640px) {
+      .bar { flex-direction: column; gap: 0.2rem; padding: 0.8rem 1rem; }
+      .hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="field"></canvas>
+  <div class="vignette"></div>
+
+  <div class="hint">// move the cursor</div>
+
+  <div class="bar">
+    <span class="who">akhil acharya — software engineer</span>
+    <span>
+      <a href="https://github.com/akhilcacharya" target="_blank" rel="noopener">github ↗</a><span class="sep">/</span><a href="https://www.linkedin.com/in/akhil-acharya/" target="_blank" rel="noopener">linkedin ↗</a>
+    </span>
+  </div>
+
+  <script>
+    'use strict';
+    const canvas = document.getElementById('field');
+    const ctx = canvas.getContext('2d', { alpha: false });
+
+    const isMobile = matchMedia('(pointer: coarse)').matches || innerWidth < 720;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ---- tiny seeded value-noise (3D, 2 octaves) ----
+    const perm = new Uint8Array(512);
+    (function () {
+      const p = Array.from({ length: 256 }, (_, i) => i);
+      let seed = 1337;
+      const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      for (let i = 255; i > 0; i--) {
+        const j = (rnd() * (i + 1)) | 0;
+        [p[i], p[j]] = [p[j], p[i]];
+      }
+      for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+    })();
+
+    const fade = t => t * t * (3 - 2 * t);
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const lat = (x, y, z) => perm[(x + perm[(y + perm[z & 255]) & 255]) & 255] / 255;
+
+    function noise3(x, y, z) {
+      const X = Math.floor(x), Y = Math.floor(y), Z = Math.floor(z);
+      const fx = fade(x - X), fy = fade(y - Y), fz = fade(z - Z);
+      const x0 = X & 255, x1 = (X + 1) & 255;
+      const y0 = Y & 255, y1 = (Y + 1) & 255;
+      const z0 = Z & 255, z1 = (Z + 1) & 255;
+      return lerp(
+        lerp(lerp(lat(x0, y0, z0), lat(x1, y0, z0), fx), lerp(lat(x0, y1, z0), lat(x1, y1, z0), fx), fy),
+        lerp(lerp(lat(x0, y0, z1), lat(x1, y0, z1), fx), lerp(lat(x0, y1, z1), lat(x1, y1, z1), fx), fy),
+        fz
+      );
+    }
+    const fbm = (x, y, z) => 0.65 * noise3(x, y, z) + 0.35 * noise3(x * 2.3, y * 2.3, z * 2.3);
+
+    // ---- grid + name mask ----
+    const CELL = isMobile ? 16 : 13;
+    const RAMP = ' ·:;+=oxX#@';
+    let cols = 0, rows = 0, mask = null, dpr = 1;
+
+    function buildMask() {
+      mask = new Float32Array(cols * rows);
+      const off = document.createElement('canvas');
+      off.width = cols;
+      off.height = rows;
+      const o = off.getContext('2d');
+      o.fillStyle = '#000';
+      o.fillRect(0, 0, cols, rows);
+      o.fillStyle = '#fff';
+      o.textAlign = 'center';
+      o.textBaseline = 'middle';
+
+      const lines = ['AKHIL', 'ACHARYA'];
+      // Fit each line to ~86% of grid width, cap by grid height
+      const sizes = lines.map(word => {
+        let s = rows;
+        o.font = `900 ${s}px 'Arial Black', 'Arial', sans-serif`;
+        const w = o.measureText(word).width;
+        s = Math.min(s * (cols * 0.86) / w, rows * 0.34);
+        return s;
+      });
+      const size = Math.min(...sizes);
+      const gap = size * 1.06;
+      const cy = rows * 0.44;
+      o.font = `900 ${size}px 'Arial Black', 'Arial', sans-serif`;
+      o.fillText('AKHIL', cols / 2, cy - gap / 2);
+      o.fillText('ACHARYA', cols / 2, cy + gap / 2);
+
+      const d = o.getImageData(0, 0, cols, rows).data;
+      for (let i = 0; i < cols * rows; i++) mask[i] = d[i * 4] / 255;
+    }
+
+    function resize() {
+      dpr = Math.min(devicePixelRatio || 1, 2);
+      canvas.width = innerWidth * dpr;
+      canvas.height = innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      cols = Math.ceil(innerWidth / CELL);
+      rows = Math.ceil(innerHeight / CELL);
+      ctx.font = `${CELL - 1}px ui-monospace, Menlo, Consolas, monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      buildMask();
+    }
+    resize();
+    addEventListener('resize', resize);
+
+    // ---- pointer ripple ----
+    const ptr = { x: -1e4, y: -1e4, energy: 0 };
+    addEventListener('pointermove', e => {
+      ptr.x = e.clientX;
+      ptr.y = e.clientY;
+      ptr.energy = 1;
+    }, { passive: true });
+    addEventListener('touchmove', e => {
+      ptr.x = e.touches[0].clientX;
+      ptr.y = e.touches[0].clientY;
+      ptr.energy = 1;
+    }, { passive: true });
+
+    // ---- render ----
+    const FPS = isMobile ? 30 : 60;
+    let last = 0;
+
+    function draw(now) {
+      requestAnimationFrame(draw);
+      if (now - last < 1000 / FPS - 2) return;
+      last = now;
+
+      const t = reduced ? 40 : now * 0.001;
+      ptr.energy *= 0.985;
+
+      ctx.fillStyle = '#0c0a06';
+      ctx.fillRect(0, 0, innerWidth, innerHeight);
+
+      const N = RAMP.length - 1;
+      for (let r = 0; r < rows; r++) {
+        const y = (r + 0.55) * CELL;
+        for (let c = 0; c < cols; c++) {
+          const m = mask[r * cols + c];
+          const n = fbm(c * 0.075, r * 0.075, t * 0.32);
+
+          let b;
+          if (m > 0.04) {
+            // inside a letter: bright, shimmering with the field
+            b = 0.5 + 0.5 * n;
+            b *= 0.35 + 0.65 * m;
+          } else {
+            // ambient field: squared for contrast, mostly dark
+            b = n * n * 0.42;
+          }
+
+          // cursor ripple
+          if (ptr.energy > 0.02) {
+            const x = (c + 0.5) * CELL;
+            const d = Math.hypot(x - ptr.x, y - ptr.y);
+            b += Math.exp(-d / 170) * (0.45 + 0.35 * Math.sin(d * 0.045 - t * 5)) * ptr.energy;
+          }
+
+          if (b < 0.055) continue;
+          if (b > 1) b = 1;
+
+          const ch = RAMP[(b * N) | 0];
+          if (ch === ' ') continue;
+
+          // warm amber, dimmer cells shift toward ember red
+          const hue = 30 + b * 12;
+          const lum = 24 + b * 46;
+          ctx.fillStyle = `hsl(${hue} 90% ${lum}%)`;
+          ctx.fillText(ch, (c + 0.5) * CELL, y);
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>

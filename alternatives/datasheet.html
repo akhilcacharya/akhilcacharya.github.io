@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AKHIL ACHARYA — Datasheet</title>
+  <meta name="description" content="Akhil Acharya — general-purpose software engineer. Datasheet, Rev. 2026.07.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ink: #111;
+      --red: #c8102e;
+      --rule: #111;
+    }
+
+    body {
+      background: #dcdcd6;
+      color: var(--ink);
+      font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 28px 14px 60px;
+    }
+
+    ::selection { background: var(--red); color: #fff; }
+
+    .sheet {
+      position: relative;
+      max-width: 920px;
+      margin: 0 auto;
+      background: #fdfdfa;
+      border: 1px solid #999;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.18);
+      padding: 34px 40px 30px;
+      overflow: hidden;
+    }
+
+    .watermark {
+      position: absolute;
+      top: 42%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-24deg);
+      font-size: 92px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      color: rgba(200, 16, 46, 0.055);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* ---------- header ---------- */
+    .doc-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 10px;
+      border-bottom: 3px solid var(--ink);
+    }
+    .brand { display: flex; gap: 10px; align-items: center; }
+    .brand .mark {
+      width: 34px; height: 34px;
+      background: var(--red);
+      color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 15px;
+    }
+    .brand .co { font-size: 11px; line-height: 1.35; }
+    .brand .co b { font-size: 12px; letter-spacing: 0.06em; }
+    .doc-no { text-align: right; font-size: 11px; line-height: 1.5; }
+
+    h1 {
+      font-size: clamp(26px, 5vw, 40px);
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      margin: 20px 0 2px;
+    }
+    .subtitle { font-size: 13px; margin-bottom: 4px; }
+    .subtitle b { color: var(--red); }
+
+    /* ---------- section bands ---------- */
+    h2 {
+      background: var(--ink);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      margin: 26px 0 10px;
+    }
+    h2 .n { color: #aaa; margin-right: 8px; }
+
+    .cols {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      column-gap: 34px;
+      align-items: start;
+    }
+
+    ul { list-style: none; }
+    ul li {
+      padding-left: 16px;
+      position: relative;
+      margin-bottom: 3px;
+    }
+    ul li::before {
+      content: '■';
+      position: absolute;
+      left: 0;
+      font-size: 8px;
+      top: 4px;
+    }
+
+    p.desc { text-align: justify; hyphens: auto; }
+    p.desc + p.desc { margin-top: 8px; }
+
+    /* ---------- tables ---------- */
+    .tablewrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid var(--rule);
+      padding: 4px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #eceae2;
+      font-weight: 600;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    td.num, th.num { text-align: center; width: 62px; }
+    .note { font-size: 11px; color: #444; margin-top: 6px; }
+    .note sup { color: var(--red); }
+
+    a { color: var(--ink); text-decoration-color: var(--red); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+    a:hover { color: var(--red); }
+
+    /* ---------- pinout ---------- */
+    .pinout { text-align: center; }
+    .pinout svg { max-width: 320px; width: 100%; height: auto; }
+    .pinout .cap { font-size: 11px; margin-top: 4px; color: #444; }
+    svg text { font-family: 'IBM Plex Mono', monospace; }
+    svg a text { fill: var(--ink); text-decoration: underline; }
+    svg a:hover text { fill: var(--red); }
+
+    /* ---------- footer ---------- */
+    .doc-foot {
+      margin-top: 30px;
+      padding-top: 10px;
+      border-top: 3px solid var(--ink);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      font-size: 10.5px;
+      color: #444;
+    }
+    .barcode {
+      height: 30px;
+      width: 150px;
+      flex: none;
+      background: repeating-linear-gradient(90deg,
+        #111 0 2px, transparent 2px 4px, #111 4px 5px, transparent 5px 9px,
+        #111 9px 12px, transparent 12px 14px, #111 14px 15px, transparent 15px 17px,
+        #111 17px 20px, transparent 20px 25px);
+    }
+    .barcode-wrap { text-align: center; font-size: 10px; letter-spacing: 0.2em; }
+
+    @media (max-width: 720px) {
+      .sheet { padding: 22px 16px; }
+      .cols { grid-template-columns: 1fr; }
+      .watermark { font-size: 52px; }
+      .doc-foot { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media print {
+      body { background: #fff; padding: 0; }
+      .sheet { box-shadow: none; border: none; max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <div class="watermark">PRELIMINARY</div>
+
+    <header class="doc-head">
+      <div class="brand">
+        <div class="mark">AA</div>
+        <div class="co">
+          <b>ACHARYA</b><br>
+          general-purpose engineering
+        </div>
+      </div>
+      <div class="doc-no">
+        Doc. No. AKHL-001-DS<br>
+        Rev. 2026.07 &mdash; JULY 2026
+      </div>
+    </header>
+
+    <h1>AKHIL ACHARYA</h1>
+    <p class="subtitle">General-Purpose <b>Software Engineer</b>, Single-Core, Human Package</p>
+
+    <div class="cols">
+      <div>
+        <h2><span class="n">1</span>Features</h2>
+        <ul>
+          <li>Mobile development</li>
+          <li>Machine learning &amp; computer vision</li>
+          <li>Distributed systems</li>
+          <li>Backwards-compatible with legacy codebases</li>
+          <li>Integrated curiosity, always enabled</li>
+          <li>Self-documenting (eventually)</li>
+          <li>Low standby power (see: sleep, &sect;4)</li>
+        </ul>
+
+        <h2><span class="n">2</span>Applications</h2>
+        <ul>
+          <li>Web &amp; mobile products</li>
+          <li>ML / CV pipelines</li>
+          <li>Systems that stay up</li>
+          <li>Late-night side projects</li>
+          <li>Thorough code review</li>
+        </ul>
+      </div>
+
+      <div>
+        <h2><span class="n">3</span>Description</h2>
+        <p class="desc">The AKHIL ACHARYA is a general-purpose software engineer optimized for mobile, machine-learning, computer-vision, and distributed-systems workloads. The device integrates a full development stack with an always-on curiosity module and requires no external frameworks to operate.</p>
+        <p class="desc">Typical applications include shipping products, reading documentation others skipped, and asking &ldquo;but what happens when it fails?&rdquo; in design reviews. Contact the manufacturer via the GITHUB or LINKEDIN pins (see pin configuration below).</p>
+
+        <div class="pinout">
+          <svg viewBox="0 0 320 240" role="img" aria-label="8-pin package diagram with links">
+            <!-- package body -->
+            <rect x="105" y="30" width="110" height="180" fill="#fdfdfa" stroke="#111" stroke-width="2"/>
+            <path d="M148 30 a12 12 0 0 0 24 0" fill="#fdfdfa" stroke="#111" stroke-width="2"/>
+            <text x="160" y="128" text-anchor="middle" font-size="11" font-weight="600" transform="rotate(90 160 124)">AKHL-001</text>
+            <!-- left pins -->
+            <g stroke="#111" stroke-width="2" fill="#fdfdfa">
+              <rect x="75" y="48"  width="30" height="12"/>
+              <rect x="75" y="90"  width="30" height="12"/>
+              <rect x="75" y="132" width="30" height="12"/>
+              <rect x="75" y="174" width="30" height="12"/>
+            </g>
+            <!-- right pins -->
+            <g stroke="#111" stroke-width="2" fill="#fdfdfa">
+              <rect x="215" y="48"  width="30" height="12"/>
+              <rect x="215" y="90"  width="30" height="12"/>
+              <rect x="215" y="132" width="30" height="12"/>
+              <rect x="215" y="174" width="30" height="12"/>
+            </g>
+            <!-- pin numbers -->
+            <g font-size="9" fill="#666">
+              <text x="112" y="58">1</text><text x="112" y="100">2</text><text x="112" y="142">3</text><text x="112" y="184">4</text>
+              <text x="202" y="58">8</text><text x="202" y="100">5</text><text x="202" y="142">6</text><text x="202" y="184">7</text>
+            </g>
+            <!-- left labels -->
+            <g font-size="11" text-anchor="end">
+              <text x="68" y="58">NC</text>
+              <a href="https://github.com/akhilcacharya" target="_blank" rel="noopener"><text x="68" y="100">GITHUB</text></a>
+              <a href="https://www.linkedin.com/in/akhil-acharya/" target="_blank" rel="noopener"><text x="68" y="142">LINKEDIN</text></a>
+              <text x="68" y="184">GND</text>
+            </g>
+            <!-- right labels -->
+            <g font-size="11">
+              <text x="252" y="58">VCC</text>
+              <text x="252" y="100">COFFEE_IN</text>
+              <text x="252" y="142">PROD_OUT</text>
+              <text x="252" y="184">NC</text>
+            </g>
+          </svg>
+          <div class="cap">Fig. 1 &mdash; Pin configuration (top view). Pins 2&ndash;3 are clickable.</div>
+        </div>
+      </div>
+    </div>
+
+    <h2><span class="n">4</span>Absolute Maximum Ratings <sup>(1)</sup></h2>
+    <div class="tablewrap">
+      <table>
+        <tr>
+          <th>Parameter</th><th class="num">Min</th><th class="num">Typ</th><th class="num">Max</th><th class="num">Unit</th>
+        </tr>
+        <tr><td>Coffee input, COFFEE_IN</td><td class="num">1</td><td class="num">2</td><td class="num">4</td><td class="num">cups/day</td></tr>
+        <tr><td>Continuous meeting exposure</td><td class="num">&mdash;</td><td class="num">2</td><td class="num">4</td><td class="num">h/day</td></tr>
+        <tr><td>Sleep (standby mode)</td><td class="num">6</td><td class="num">8</td><td class="num">10</td><td class="num">h/night</td></tr>
+        <tr><td>Unread notification backlog</td><td class="num">0</td><td class="num">40</td><td class="num">&infin;</td><td class="num">items</td></tr>
+        <tr><td>Tabs open, sustained</td><td class="num">1</td><td class="num">30</td><td class="num">200</td><td class="num">tabs</td></tr>
+      </table>
+    </div>
+    <p class="note"><sup>(1)</sup> Stresses beyond those listed may cause permanent grumpiness. Exposure to absolute-maximum-rated conditions for extended periods may affect device reliability.</p>
+
+    <h2><span class="n">5</span>Ordering Information</h2>
+    <div class="tablewrap">
+      <table>
+        <tr><th>Part number</th><th>Package</th><th>Status</th><th>Channel</th></tr>
+        <tr>
+          <td>ACHARYA-AKHIL</td>
+          <td>HUMAN-1</td>
+          <td>ACTIVE</td>
+          <td><a href="https://github.com/akhilcacharya" target="_blank" rel="noopener">github.com/akhilcacharya</a> &middot; <a href="https://www.linkedin.com/in/akhil-acharya/" target="_blank" rel="noopener">linkedin</a></td>
+        </tr>
+      </table>
+    </div>
+
+    <footer class="doc-foot">
+      <div>
+        IMPORTANT NOTICE: Specifications subject to change after sufficient coffee.<br>
+        The manufacturer assumes no liability for bugs introduced after 2 a.m.
+      </div>
+      <div class="barcode-wrap">
+        <div class="barcode"></div>
+        AKHL&middot;001&middot;2026
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Akhil Acharya</title>
+  <meta name="description" content="Akhil Acharya — software engineer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --chrome-font: 'Silkscreen', 'Chicago', monospace;
+      --body-font: 'Geneva', 'Verdana', 'Helvetica Neue', sans-serif;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      overflow: hidden;
+      background-color: #7d7d7d;
+      /* classic 50% dither desktop */
+      background-image: conic-gradient(#868686 25%, #6f6f6f 0 50%, #868686 0 75%, #6f6f6f 0);
+      background-size: 4px 4px;
+      font-family: var(--body-font);
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ---------- menu bar ---------- */
+    .menubar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 26px;
+      background: #fff;
+      border-bottom: 2px solid #000;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 10px;
+      font-family: var(--chrome-font);
+      font-size: 10px;
+      z-index: 9000;
+    }
+    .menubar .item {
+      padding: 5px 9px 3px;
+      cursor: default;
+    }
+    .menubar .item:active, .menubar .item.open {
+      background: #000;
+      color: #fff;
+    }
+    .menubar .logo { font-size: 12px; padding: 3px 10px 1px; }
+    .menubar .spacer { flex: 1; }
+    .menubar .clock { padding: 5px 4px 3px; }
+
+    .dropdown {
+      position: fixed;
+      top: 26px;
+      left: 8px;
+      background: #fff;
+      border: 2px solid #000;
+      box-shadow: 2px 2px 0 #000;
+      z-index: 9001;
+      display: none;
+      min-width: 190px;
+    }
+    .dropdown.show { display: block; }
+    .dropdown div {
+      font-family: var(--chrome-font);
+      font-size: 10px;
+      padding: 6px 12px 4px;
+      cursor: default;
+    }
+    .dropdown div:hover { background: #000; color: #fff; }
+    .dropdown hr { border: none; border-top: 2px dotted #888; margin: 2px 0; }
+
+    /* ---------- desktop icons ---------- */
+    .icon {
+      position: absolute;
+      width: 84px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: default;
+      z-index: 10;
+    }
+    .icon svg { width: 34px; height: 34px; shape-rendering: crispEdges; }
+    .icon .label {
+      font-family: var(--chrome-font);
+      font-size: 9px;
+      background: #fff;
+      color: #000;
+      padding: 2px 4px 0;
+      border: 1px solid transparent;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .icon.selected .label { background: #000; color: #fff; }
+    .icon.selected svg { filter: invert(1); }
+
+    /* ---------- windows ---------- */
+    .window {
+      position: absolute;
+      background: #fff;
+      border: 2px solid #000;
+      box-shadow: 2px 2px 0 #000;
+      min-width: 230px;
+      z-index: 100;
+      display: none;
+    }
+    .window.open { display: block; }
+
+    .titlebar {
+      position: relative;
+      height: 24px;
+      border-bottom: 2px solid #000;
+      background: #fff;
+      cursor: grab;
+      touch-action: none;
+    }
+    .window.active .titlebar {
+      background-image: repeating-linear-gradient(180deg, #000 0 1px, #fff 1px 3px);
+      background-clip: content-box;
+      padding: 4px 3px;
+    }
+    .titlebar .title {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 24px;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      padding: 2px 8px 0;
+      font-family: var(--chrome-font);
+      font-size: 10px;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .closebox {
+      position: absolute;
+      left: 8px;
+      top: 5px;
+      width: 13px;
+      height: 13px;
+      background: #fff;
+      border: 2px solid #000;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .closebox:active { background: #000; }
+
+    .content {
+      padding: 14px;
+      font-size: 12px;
+      line-height: 1.55;
+      color: #000;
+    }
+
+    /* about window */
+    .about-flex { display: flex; gap: 14px; align-items: flex-start; }
+    .about-flex canvas {
+      width: 96px;
+      height: auto;
+      border: 2px solid #000;
+      image-rendering: pixelated;
+      flex: none;
+    }
+    .about-flex p + p { margin-top: 8px; }
+    .content .fine {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 2px dotted #999;
+      font-size: 10px;
+      color: #555;
+    }
+
+    /* links window */
+    .linkrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 8px;
+      text-decoration: none;
+      color: #000;
+      border-bottom: 2px dotted #bbb;
+    }
+    .linkrow:last-child { border-bottom: none; }
+    .linkrow:hover { background: #000; color: #fff; }
+    .linkrow:hover svg { filter: invert(1); }
+    .linkrow svg { width: 22px; height: 22px; shape-rendering: crispEdges; flex: none; }
+    .linkrow .name { font-family: var(--chrome-font); font-size: 10px; }
+    .linkrow .detail { font-size: 11px; opacity: 0.65; margin-left: auto; }
+
+    /* system about window */
+    .sysabout { text-align: center; }
+    .sysabout .biglogo { font-family: var(--chrome-font); font-size: 15px; margin: 6px 0 2px; }
+    .sysabout table {
+      margin: 10px auto 2px;
+      font-size: 11px;
+      border-spacing: 0;
+      text-align: left;
+    }
+    .sysabout td { padding: 1px 8px; }
+
+    @media (max-width: 640px) {
+      .menubar .item.hide-sm { display: none; }
+      .window { max-width: calc(100vw - 18px); }
+      .icon { transform: scale(0.92); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- menu bar -->
+  <div class="menubar">
+    <div class="item logo" id="logoMenu">❖</div>
+    <div class="item"><b>Akhil</b></div>
+    <div class="item hide-sm">File</div>
+    <div class="item hide-sm">Edit</div>
+    <div class="item hide-sm">View</div>
+    <div class="item hide-sm">Special</div>
+    <div class="spacer"></div>
+    <div class="item clock" id="clock">…</div>
+  </div>
+
+  <div class="dropdown" id="logoDrop">
+    <div data-open="win-sysabout">About This Site…</div>
+    <hr>
+    <div data-open="win-about">About Me</div>
+    <div data-open="win-links">Links</div>
+    <div data-open="win-trash">Trash</div>
+  </div>
+
+  <!-- desktop icons -->
+  <div class="icon" style="top: 44px; right: 14px;" data-open="win-sysabout">
+    <svg viewBox="0 0 32 32"><rect x="2" y="8" width="28" height="16" fill="#fff" stroke="#000" stroke-width="2"/><rect x="5" y="18" width="10" height="2" fill="#000"/><rect x="24" y="18" width="3" height="3" fill="#000"/></svg>
+    <div class="label">Akhil HD</div>
+  </div>
+
+  <div class="icon" style="top: 130px; right: 14px;" data-open="win-about">
+    <svg viewBox="0 0 32 32"><path d="M6 2 h14 l6 6 v22 h-20 z" fill="#fff" stroke="#000" stroke-width="2"/><path d="M20 2 v6 h6" fill="none" stroke="#000" stroke-width="2"/><rect x="10" y="13" width="12" height="2" fill="#000"/><rect x="10" y="17" width="12" height="2" fill="#000"/><rect x="10" y="21" width="8" height="2" fill="#000"/></svg>
+    <div class="label">About Me</div>
+  </div>
+
+  <div class="icon" style="top: 216px; right: 14px;" data-open="win-links">
+    <svg viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#fff" stroke="#000" stroke-width="2"/><ellipse cx="16" cy="16" rx="6" ry="13" fill="none" stroke="#000" stroke-width="2"/><rect x="3" y="15" width="26" height="2" fill="#000"/></svg>
+    <div class="label">Links</div>
+  </div>
+
+  <div class="icon" style="bottom: 18px; right: 14px;" data-open="win-trash">
+    <svg viewBox="0 0 32 32"><path d="M8 10 h16 v18 h-16 z" fill="#fff" stroke="#000" stroke-width="2"/><rect x="5" y="7" width="22" height="3" fill="#fff" stroke="#000" stroke-width="2"/><rect x="13" y="4" width="6" height="3" fill="#fff" stroke="#000" stroke-width="2"/><rect x="12" y="14" width="2" height="10" fill="#000"/><rect x="18" y="14" width="2" height="10" fill="#000"/></svg>
+    <div class="label">Trash</div>
+  </div>
+
+  <!-- windows -->
+  <div class="window open" id="win-about" style="width: 400px;">
+    <div class="titlebar"><div class="closebox"></div><div class="title">About Me</div></div>
+    <div class="content">
+      <div class="about-flex">
+        <canvas id="face" width="1" height="1" title="Akhil, in glorious 1-bit"></canvas>
+        <div>
+          <p><b>Hi, I&rsquo;m Akhil</b> &mdash; software engineer.</p>
+          <p>I love learning about mobile development, machine learning, computer vision, and distributed&nbsp;systems.</p>
+        </div>
+      </div>
+      <div class="fine">System requirements: curiosity. No other dependencies.</div>
+    </div>
+  </div>
+
+  <div class="window open" id="win-links" style="width: 330px;">
+    <div class="titlebar"><div class="closebox"></div><div class="title">Links &mdash; 2 items</div></div>
+    <div class="content" style="padding: 6px;">
+      <a class="linkrow" href="https://github.com/akhilcacharya" target="_blank" rel="noopener">
+        <svg viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" fill="#fff" stroke="#000" stroke-width="2"/><rect x="9" y="10" width="4" height="4" fill="#000"/><rect x="19" y="10" width="4" height="4" fill="#000"/><rect x="9" y="20" width="2" height="2" fill="#000"/><rect x="12" y="22" width="8" height="2" fill="#000"/><rect x="21" y="20" width="2" height="2" fill="#000"/></svg>
+        <span class="name">GitHub</span>
+        <span class="detail">@akhilcacharya</span>
+      </a>
+      <a class="linkrow" href="https://www.linkedin.com/in/akhil-acharya/" target="_blank" rel="noopener">
+        <svg viewBox="0 0 32 32"><rect x="4" y="4" width="24" height="24" fill="#fff" stroke="#000" stroke-width="2"/><rect x="9" y="9" width="4" height="4" fill="#000"/><rect x="9" y="15" width="4" height="9" fill="#000"/><rect x="16" y="15" width="4" height="9" fill="#000"/><rect x="20" y="17" width="4" height="7" fill="#000"/></svg>
+        <span class="name">LinkedIn</span>
+        <span class="detail">/in/akhil-acharya</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="window" id="win-sysabout" style="width: 340px;">
+    <div class="titlebar"><div class="closebox"></div><div class="title">About This Site</div></div>
+    <div class="content sysabout">
+      <div class="biglogo">❖ AkhilOS 7.2</div>
+      <div style="font-size: 11px;">&copy; Akhil Acharya, 2015&ndash;2026</div>
+      <table>
+        <tr><td>Built-in memory:</td><td><b>one HTML file</b></td></tr>
+        <tr><td>Frameworks installed:</td><td><b>none</b></td></tr>
+        <tr><td>Largest unused block:</td><td><b>the backlog</b></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="window" id="win-trash" style="width: 300px;">
+    <div class="titlebar"><div class="closebox"></div><div class="title">Trash</div></div>
+    <div class="content">
+      <p style="text-align:center; padding: 12px 0;">0 items &nbsp;&mdash;&nbsp; everything shipped.</p>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+    const isCoarse = matchMedia('(pointer: coarse)').matches;
+    let zTop = 200;
+
+    // ---- initial layout ----
+    function place() {
+      const W = innerWidth, H = innerHeight;
+      const about = document.getElementById('win-about');
+      const links = document.getElementById('win-links');
+      const sys = document.getElementById('win-sysabout');
+      const trash = document.getElementById('win-trash');
+      if (W < 640) {
+        about.style.left = '9px'; about.style.top = '40px';
+        links.style.left = '9px'; links.style.top = '270px';
+        sys.style.left = '14px'; sys.style.top = '90px';
+        trash.style.left = '20px'; trash.style.top = '120px';
+      } else {
+        about.style.left = Math.max(30, W * 0.5 - 400) + 'px';
+        about.style.top = Math.max(50, H * 0.30) + 'px';
+        links.style.left = Math.min(W - 460, W * 0.5 + 60) + 'px';
+        links.style.top = Math.max(80, H * 0.30 + 60) + 'px';
+        sys.style.left = W * 0.5 - 170 + 'px';
+        sys.style.top = H * 0.24 + 'px';
+        trash.style.left = W * 0.5 - 150 + 'px';
+        trash.style.top = H * 0.4 + 'px';
+      }
+    }
+    place();
+
+    // ---- window focus + drag ----
+    const windows = [...document.querySelectorAll('.window')];
+
+    function focusWin(w) {
+      windows.forEach(x => x.classList.remove('active'));
+      w.classList.add('active');
+      w.style.zIndex = ++zTop;
+    }
+
+    windows.forEach(w => {
+      w.addEventListener('pointerdown', () => focusWin(w));
+
+      const bar = w.querySelector('.titlebar');
+      let drag = null;
+      bar.addEventListener('pointerdown', e => {
+        if (e.target.classList.contains('closebox')) return;
+        drag = { dx: e.clientX - w.offsetLeft, dy: e.clientY - w.offsetTop };
+        bar.setPointerCapture(e.pointerId);
+      });
+      bar.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const x = Math.min(Math.max(e.clientX - drag.dx, -w.offsetWidth + 60), innerWidth - 60);
+        const y = Math.min(Math.max(e.clientY - drag.dy, 28), innerHeight - 30);
+        w.style.left = x + 'px';
+        w.style.top = y + 'px';
+      });
+      bar.addEventListener('pointerup', () => drag = null);
+      bar.addEventListener('pointercancel', () => drag = null);
+
+      w.querySelector('.closebox').addEventListener('click', () => w.classList.remove('open'));
+    });
+
+    focusWin(document.getElementById('win-about'));
+
+    function openWin(id) {
+      const w = document.getElementById(id);
+      w.classList.add('open');
+      focusWin(w);
+    }
+
+    // ---- desktop icons: click selects, dblclick (or tap) opens ----
+    document.querySelectorAll('.icon').forEach(icon => {
+      icon.addEventListener('click', () => {
+        document.querySelectorAll('.icon').forEach(i => i.classList.remove('selected'));
+        icon.classList.add('selected');
+        if (isCoarse) openWin(icon.dataset.open);
+      });
+      icon.addEventListener('dblclick', () => openWin(icon.dataset.open));
+    });
+    document.body.addEventListener('click', e => {
+      if (e.target === document.body) {
+        document.querySelectorAll('.icon').forEach(i => i.classList.remove('selected'));
+      }
+    });
+
+    // ---- logo dropdown ----
+    const logo = document.getElementById('logoMenu');
+    const drop = document.getElementById('logoDrop');
+    logo.addEventListener('click', e => {
+      e.stopPropagation();
+      drop.classList.toggle('show');
+      logo.classList.toggle('open', drop.classList.contains('show'));
+    });
+    drop.querySelectorAll('[data-open]').forEach(item => {
+      item.addEventListener('click', () => {
+        openWin(item.dataset.open);
+        drop.classList.remove('show');
+        logo.classList.remove('open');
+      });
+    });
+    document.addEventListener('click', () => {
+      drop.classList.remove('show');
+      logo.classList.remove('open');
+    });
+
+    // ---- menubar clock ----
+    const clock = document.getElementById('clock');
+    function tick() {
+      const d = new Date();
+      const day = d.toLocaleDateString('en-US', { weekday: 'short' });
+      const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      clock.textContent = `${day} ${time}`;
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    // ---- 1-bit Bayer dither of face.jpg ----
+    const BAYER = [
+      [0, 8, 2, 10],
+      [12, 4, 14, 6],
+      [3, 11, 1, 9],
+      [15, 7, 13, 5]
+    ];
+    const img = new Image();
+    img.src = '../img/face.jpg';
+    img.onload = () => {
+      const c = document.getElementById('face');
+      const scale = 96 / img.width;
+      c.width = 96;
+      c.height = Math.round(img.height * scale);
+      const g = c.getContext('2d');
+      g.drawImage(img, 0, 0, c.width, c.height);
+      const id = g.getImageData(0, 0, c.width, c.height);
+      const d = id.data;
+      // normalize contrast a bit, then ordered dither to pure B/W
+      for (let y = 0; y < c.height; y++) {
+        for (let x = 0; x < c.width; x++) {
+          const i = (y * c.width + x) * 4;
+          let l = (d[i] * 0.299 + d[i + 1] * 0.587 + d[i + 2] * 0.114) / 255;
+          l = Math.min(1, Math.max(0, (l - 0.15) / 0.7));
+          const on = l > (BAYER[y % 4][x % 4] + 0.5) / 16;
+          d[i] = d[i + 1] = d[i + 2] = on ? 255 : 0;
+        }
+      }
+      g.putImageData(id, 0, 0);
+    };
+    img.onerror = () => document.getElementById('face').remove();
+  </script>
+</body>
+</html>

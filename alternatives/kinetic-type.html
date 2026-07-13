@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Akhil Acharya</title>
+  <meta name="description" content="Akhil Acharya — software engineer.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,100..900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --paper: #f2eee3;
+      --ink: #181510;
+      --accent: #e8501a;
+    }
+
+    html { -webkit-font-smoothing: antialiased; }
+
+    body {
+      min-height: 100dvh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Fraunces', Georgia, serif;
+      overflow: hidden;
+      cursor: crosshair;
+    }
+
+    ::selection { background: var(--accent); color: var(--paper); }
+
+    /* film grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: -50%;
+      z-index: 10;
+      pointer-events: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+      opacity: 0.045;
+      animation: grain 0.9s steps(3) infinite;
+    }
+    @keyframes grain {
+      0%   { transform: translate(0, 0); }
+      33%  { transform: translate(-2%, 3%); }
+      66%  { transform: translate(3%, -2%); }
+      100% { transform: translate(0, 0); }
+    }
+
+    main {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(1rem, 3vh, 2.2rem);
+      padding: 1rem;
+    }
+
+    h1 {
+      font-weight: 300;
+      text-align: center;
+      line-height: 0.86;
+      letter-spacing: -0.015em;
+      user-select: none;
+    }
+
+    h1 .line { display: block; white-space: nowrap; }
+    h1 .line:nth-child(1) { font-size: clamp(4.5rem, 21.5vw, 21.5vh); }
+    h1 .line:nth-child(2) { font-size: clamp(3.2rem, 15vw, 15vh); }
+
+    h1 .ch {
+      display: inline-block;
+      font-variation-settings: 'opsz' 60, 'wght' 300;
+      will-change: font-variation-settings;
+    }
+
+    .role {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(0.6rem, 1.35vw, 0.78rem);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: color-mix(in srgb, var(--ink) 62%, var(--paper));
+      text-align: center;
+    }
+    .role em { font-style: normal; color: var(--accent); }
+
+    .corner {
+      position: fixed;
+      z-index: 5;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      line-height: 1.7;
+    }
+    .tl { top: 1.4rem; left: 1.6rem; }
+    .tr { top: 1.4rem; right: 1.6rem; text-align: right; }
+    .bl { bottom: 1.4rem; left: 1.6rem; }
+    .br { bottom: 1.4rem; right: 1.6rem; text-align: right; }
+
+    .corner .dim { color: color-mix(in srgb, var(--ink) 45%, var(--paper)); }
+
+    .corner a {
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid color-mix(in srgb, var(--ink) 30%, var(--paper));
+      padding-bottom: 1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .corner a:hover { color: var(--accent); border-color: var(--accent); }
+    .corner a .arrow { font-family: sans-serif; }
+
+    .spin {
+      display: inline-block;
+      color: var(--accent);
+      animation: spin 14s linear infinite;
+      font-style: normal;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      .tr, .bl { display: none; }
+      .tl { left: 1.1rem; top: 1.1rem; }
+      .br { right: 1.1rem; bottom: 1.1rem; }
+      body { cursor: auto; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body::after, .spin { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 aria-label="Akhil Acharya">
+      <span class="line" data-text="AKHIL"></span>
+      <span class="line" data-text="ACHARYA"></span>
+    </h1>
+    <p class="role">mobile <em>·</em> machine learning <em>·</em> computer vision <em>·</em> distributed systems</p>
+  </main>
+
+  <div class="corner tl">
+    Akhil Acharya<br>
+    <span class="dim">Personal site</span>
+  </div>
+  <div class="corner tr">
+    Software engineer <span class="spin">✳</span><br>
+    <span class="dim">EST. 2015</span>
+  </div>
+  <div class="corner bl">
+    <a href="https://github.com/akhilcacharya" target="_blank" rel="noopener">GitHub <span class="arrow">↗</span></a><br>
+    <a href="https://www.linkedin.com/in/akhil-acharya/" target="_blank" rel="noopener">LinkedIn <span class="arrow">↗</span></a>
+  </div>
+  <div class="corner br">
+    <span id="clock">00:00:00</span><br>
+    <span class="dim">Local time</span>
+  </div>
+
+  <script>
+    // Split lines into letters
+    const letters = [];
+    document.querySelectorAll('h1 .line').forEach(line => {
+      for (const c of line.dataset.text) {
+        const s = document.createElement('span');
+        s.className = 'ch';
+        s.textContent = c;
+        line.appendChild(s);
+        letters.push({ el: s, w: 300, tw: 300, cx: 0, cy: 0 });
+      }
+    });
+
+    function measure() {
+      for (const l of letters) {
+        const r = l.el.getBoundingClientRect();
+        l.cx = r.left + r.width / 2;
+        l.cy = r.top + r.height / 2;
+      }
+    }
+    measure();
+    window.addEventListener('resize', measure);
+    // Re-measure once fonts arrive (metrics shift)
+    if (document.fonts) document.fonts.ready.then(measure);
+
+    const pointer = { x: -9999, y: -9999, active: false };
+    let lastMove = 0;
+
+    window.addEventListener('pointermove', e => {
+      pointer.x = e.clientX;
+      pointer.y = e.clientY;
+      pointer.active = true;
+      lastMove = performance.now();
+    });
+
+    const RADIUS = Math.min(window.innerWidth, window.innerHeight) * 0.42;
+    const hasHover = window.matchMedia('(hover: hover)').matches;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function frame(now) {
+      const t = now * 0.001;
+      const idle = !hasHover || !pointer.active || now - lastMove > 2500;
+
+      letters.forEach((l, i) => {
+        if (idle) {
+          // slow breathing wave when there's no cursor to play with
+          l.tw = reduced ? 340 : 300 + 260 * (0.5 + 0.5 * Math.sin(t * 1.1 - i * 0.48));
+        } else {
+          const d = Math.hypot(pointer.x - l.cx, pointer.y - l.cy);
+          const p = Math.max(0, 1 - d / RADIUS);
+          l.tw = 240 + 660 * (p * p * (3 - 2 * p)); // smoothstep
+        }
+        l.w += (l.tw - l.w) * 0.14;
+        const opsz = 30 + (l.w - 100) / 800 * 114;
+        l.el.style.fontVariationSettings = `'opsz' ${opsz.toFixed(1)}, 'wght' ${l.w.toFixed(0)}`;
+      });
+
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    // Clock
+    const clock = document.getElementById('clock');
+    function tick() {
+      clock.textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+    }
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>

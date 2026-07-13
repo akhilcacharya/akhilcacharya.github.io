@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Akhil Acharya</title>
+  <meta name="description" content="Akhil Acharya">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      overflow: hidden;
+      font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      -webkit-font-smoothing: antialiased;
+      transition: background 0.4s;
+    }
+    body[data-theme="dark"]  { background: #08090c; --fg: #f2f2ee; --dim: #6b6f78; }
+    body[data-theme="light"] { background: #f4f1e8; --fg: #17140e; --dim: #98917f; }
+
+    #stage { position: fixed; inset: 0; touch-action: none; }
+
+    .links {
+      position: fixed;
+      right: 1.2rem;
+      bottom: 1.1rem;
+      z-index: 20;
+      display: flex;
+      gap: 1.3rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.09em;
+    }
+    .links a {
+      color: var(--dim);
+      text-decoration: none;
+      padding: 0.4rem 0.1rem;
+      transition: color 0.25s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .links a:hover, .links a:active { color: var(--fg); }
+
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <div id="stage"></div>
+  <h1 class="sr-only">Akhil Acharya</h1>
+  <nav class="links" aria-label="Profiles">
+    <a href="https://github.com/akhilcacharya" target="_blank" rel="noopener">github ↗</a>
+    <a href="https://www.linkedin.com/in/akhil-acharya/" target="_blank" rel="noopener">linkedin ↗</a>
+  </nav>
+
+  <script type="module">
+    // One piece per day of the week, keyed to Eastern Time (Cambridge, MA).
+    const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    const q = new URLSearchParams(location.search);
+
+    let idx;
+    if (q.has('day')) {
+      idx = (((parseInt(q.get('day'), 10) || 0) % 7) + 7) % 7;
+    } else {
+      try {
+        const wd = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', weekday: 'short' })
+          .format(new Date()).toLowerCase().slice(0, 3);
+        idx = Math.max(0, days.indexOf(wd));
+      } catch {
+        idx = new Date().getDay();
+      }
+    }
+
+    import(`./days/${days[idx]}.js`).then(m => m.default(document.getElementById('stage')));
+
+    // quiet affordance: arrow keys preview the other days
+    addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+        location.search = '?day=' + ((idx + (e.key === 'ArrowRight' ? 1 : 6)) % 7);
+      }
+    });
+  </script>
+</body>
+</html>

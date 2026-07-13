@@ -19,6 +19,7 @@
 
     #stage { position: fixed; inset: 0; touch-action: none; }
 
+    /* ---- shared profile links (every day) ---- */
     .links {
       position: fixed;
       right: 1.2rem;
@@ -38,6 +39,68 @@
     }
     .links a:hover, .links a:active { color: var(--fg); }
 
+    /* ---- day switcher: quiet rail on the left, reveals on hover ---- */
+    .rail {
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      padding: 0.5rem 0.7rem;
+    }
+    .rail a {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      text-decoration: none;
+      color: var(--dim);
+      font-size: 0.62rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      padding: 0.26rem 0.1rem;
+      transition: color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rail a i {
+      display: block;
+      width: 13px;
+      height: 1px;
+      background: currentColor;
+      opacity: 0.5;
+      transition: width 0.2s ease, opacity 0.2s;
+    }
+    .rail a span {
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .rail:hover a span, .rail:focus-within a span { opacity: 0.7; transform: none; }
+    .rail a:hover { color: var(--fg); }
+    .rail a.current { color: var(--fg); }
+    .rail a.current i { width: 22px; opacity: 1; }
+    .rail a.current span { opacity: 1; transform: none; }
+
+    @media (max-width: 640px) {
+      /* collapse to a row of dots along the bottom */
+      .rail {
+        left: 50%;
+        top: auto;
+        bottom: 1.05rem;
+        transform: translateX(-50%);
+        flex-direction: row;
+        gap: 0.55rem;
+        padding: 0.4rem;
+      }
+      .rail a { padding: 0.4rem 0.15rem; }
+      .rail a span { display: none; }
+      .rail a i { width: 5px; height: 5px; border-radius: 50%; opacity: 0.45; }
+      .rail a.current i { width: 7px; height: 7px; opacity: 1; }
+      .links { bottom: 1.05rem; right: 1rem; gap: 1rem; }
+    }
+
     .sr-only {
       position: absolute;
       width: 1px; height: 1px;
@@ -50,6 +113,17 @@
 <body data-theme="dark">
   <div id="stage"></div>
   <h1 class="sr-only">Akhil Acharya</h1>
+
+  <nav class="rail" aria-label="Day of the week">
+    <a href="?day=0" data-day="0"><i></i><span>Sun</span></a>
+    <a href="?day=1" data-day="1"><i></i><span>Mon</span></a>
+    <a href="?day=2" data-day="2"><i></i><span>Tue</span></a>
+    <a href="?day=3" data-day="3"><i></i><span>Wed</span></a>
+    <a href="?day=4" data-day="4"><i></i><span>Thu</span></a>
+    <a href="?day=5" data-day="5"><i></i><span>Fri</span></a>
+    <a href="?day=6" data-day="6"><i></i><span>Sat</span></a>
+  </nav>
+
   <nav class="links" aria-label="Profiles">
     <a href="https://github.com/akhilcacharya" target="_blank" rel="noopener">github ↗</a>
     <a href="https://www.linkedin.com/in/akhil-acharya/" target="_blank" rel="noopener">linkedin ↗</a>
@@ -73,9 +147,13 @@
       }
     }
 
+    // mark the active day in the rail
+    const railItem = document.querySelector(`.rail a[data-day="${idx}"]`);
+    if (railItem) railItem.classList.add('current');
+
     import(`./days/${days[idx]}.js`).then(m => m.default(document.getElementById('stage')));
 
-    // quiet affordance: arrow keys preview the other days
+    // arrow keys step through the week
     addEventListener('keydown', e => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
         location.search = '?day=' + ((idx + (e.key === 'ArrowRight' ? 1 : 6)) % 7);

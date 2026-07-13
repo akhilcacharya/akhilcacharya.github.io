@@ -1,106 +1,125 @@
-// TUESDAY — organism. Gray–Scott reaction–diffusion grows a living coral
-// around the name; touch it and it grows where you linger.
-import { canvasIn, COARSE, REDUCED, nameMask, pointer } from './util.js';
+// TUESDAY — relief. A slowly flowing topographic map. The name is a raised
+// plateau, traced by nested contour rings; the cursor pushes up a hill and
+// the contours bunch around it like terrain under your thumb.
+import { canvasIn, DPR, COARSE, REDUCED, nameMask, pointer, noiseFactory } from './util.js';
 
 export default function run(stage) {
-  document.body.dataset.theme = 'dark';
+  document.body.dataset.theme = 'light';
   const [c, g] = canvasIn(stage);
+  const { fbm } = noiseFactory(2024);
   const ptr = pointer();
 
-  const GW = COARSE ? 260 : 460;
-  const ITERS = REDUCED ? 2 : (COARSE ? 5 : 7);
-  const F = 0.0367;
-  const K_OUT = 0.0630;  // outside the name: coral / worms
-  const K_IN = 0.0480;   // inside the name: solid growth
-  const DU = 0.2097, DV = 0.1050;
+  const CELL = COARSE ? 10 : 7;
+  const NLEV = 17;
+  const HMAX = 2.2;
+  const levels = [];
+  for (let i = 1; i <= NLEV; i++) levels.push(i / (NLEV + 1) * HMAX);
 
-  let W, H, gw, gh, U, V, U2, V2, mask, img, buf;
+  let W, H, gw, gh, blur, height;
+
+  // one-time smoothing of the name mask into a rounded plateau
+  function blurMask(src, w, h, r, passes) {
+    let a = src;
+    for (let p = 0; p < passes; p++) {
+      const b = new Float32Array(w * h);
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let s = 0, n = 0;
+          for (let dy = -r; dy <= r; dy++) {
+            const yy = y + dy;
+            if (yy < 0 || yy >= h) continue;
+            for (let dx = -r; dx <= r; dx++) {
+              const xx = x + dx;
+              if (xx < 0 || xx >= w) continue;
+              s += a[yy * w + xx]; n++;
+            }
+          }
+          b[y * w + x] = s / n;
+        }
+      }
+      a = b;
+    }
+    return a;
+  }
 
   function reset() {
+    const dpr = DPR();
     W = innerWidth; H = innerHeight;
-    gw = GW;
-    gh = Math.max(80, Math.round(GW * H / W));
-    c.width = gw; c.height = gh;
-    c.style.imageRendering = 'auto';
-    const n = gw * gh;
-    U = new Float32Array(n).fill(1);
-    V = new Float32Array(n).fill(0);
-    U2 = new Float32Array(n);
-    V2 = new Float32Array(n);
-    mask = nameMask(gw, gh, ['AKHIL', 'ACHARYA'], 0.8);
-    // seed: the name plus a few random motes (U/V must stay in [0,1])
-    for (let i = 0; i < n; i++) if (mask[i] > 0.4) { U[i] = 0.5; V[i] = 0.25; }
-    for (let s = 0; s < 24; s++) {
-      const x = (Math.random() * gw) | 0, y = (Math.random() * gh) | 0;
-      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
-        const i = ((y + dy + gh) % gh) * gw + ((x + dx + gw) % gw);
-        U[i] = 0.5; V[i] = 0.25;
-      }
-    }
-    img = g.createImageData(gw, gh);
-    buf = img.data;
+    c.width = W * dpr; c.height = H * dpr;
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    gw = Math.ceil(W / CELL) + 1;
+    gh = Math.ceil(H / CELL) + 1;
+    const m = nameMask(gw, gh, ['AKHIL', 'ACHARYA'], gw < 90 ? 0.94 : 0.82);
+    blur = blurMask(m, gw, gh, 2, 2);
+    height = new Float32Array(gw * gh);
   }
   reset();
   let rt;
-  addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(reset, 250); });
+  addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(reset, 200); });
 
-  function stepRD() {
-    for (let y = 0; y < gh; y++) {
-      const up = ((y - 1 + gh) % gh) * gw;
-      const dn = ((y + 1) % gh) * gw;
-      const row = y * gw;
-      for (let x = 0; x < gw; x++) {
-        const i = row + x;
-        const l = row + ((x - 1 + gw) % gw);
-        const r = row + ((x + 1) % gw);
-        const u = U[i], v = V[i];
-        const lapU = U[l] + U[r] + U[up + x] + U[dn + x] - 4 * u;
-        const lapV = V[l] + V[r] + V[up + x] + V[dn + x] - 4 * v;
-        const uvv = u * v * v;
-        const k = mask[i] > 0.35 ? K_IN : K_OUT;
-        let nu = u + (DU * lapU - uvv + F * (1 - u));
-        let nv = v + (DV * lapV + uvv - (F + k) * v);
-        U2[i] = nu < 0 ? 0 : nu > 1 ? 1 : nu;
-        V2[i] = nv < 0 ? 0 : nv > 1 ? 1 : nv;
-      }
-    }
-    [U, U2] = [U2, U];
-    [V, V2] = [V2, V];
-  }
-
-  function dab(cx, cy, rad, amt) {
-    for (let dy = -rad; dy <= rad; dy++) for (let dx = -rad; dx <= rad; dx++) {
-      if (dx * dx + dy * dy > rad * rad) continue;
-      const x = (cx + dx + gw) % gw, y = (cy + dy + gh) % gh;
-      V[y * gw + x] = Math.min(1, V[y * gw + x] + amt);
-    }
-  }
+  const SIG2 = 2 * 95 * 95;
+  const ex = new Float32Array(4), ey = new Float32Array(4);
 
   function frame(now) {
     requestAnimationFrame(frame);
+    const t = REDUCED ? 30 : now * 0.001;
+    const z = t * 0.05, flow = t * 0.06;
 
-    // pointer feeds the organism
-    if (ptr.active && now - ptr.last < 120) {
-      dab((ptr.x / W * gw) | 0, (ptr.y / H * gh) | 0, 3, 0.3);
-    }
-    // keep the name alive under the growth
-    for (let i = 0; i < mask.length; i++) {
-      if (mask[i] > 0.4 && V[i] < 0.2) V[i] = 0.2;
+    // build the height field
+    const active = ptr.active;
+    const px = ptr.x, py = ptr.y;
+    for (let r = 0; r < gh; r++) {
+      for (let cc = 0; cc < gw; cc++) {
+        let h = fbm(cc * 0.06 + flow, r * 0.06, z) * 1.15 + blur[r * gw + cc] * 1.3;
+        if (active) {
+          const dx = cc * CELL - px, dy = r * CELL - py;
+          h += Math.exp(-(dx * dx + dy * dy) / SIG2);
+        }
+        height[r * gw + cc] = h;
+      }
     }
 
-    for (let s = 0; s < ITERS; s++) stepRD();
-
-    // duotone render: deep ink -> sea glass
-    for (let i = 0; i < gw * gh; i++) {
-      let v = V[i] * 2.6;
-      if (v > 1) v = 1;
-      v = v * v * (3 - 2 * v);
-      buf[i * 4]     = 6  + v * (98 - 6);
-      buf[i * 4 + 1] = 10 + v * (242 - 10);
-      buf[i * 4 + 2] = 18 + v * (205 - 18);
-      buf[i * 4 + 3] = 255;
+    // marching squares -> one Path2D per contour level
+    const paths = levels.map(() => new Path2D());
+    for (let r = 0; r < gh - 1; r++) {
+      for (let cc = 0; cc < gw - 1; cc++) {
+        const i = r * gw + cc;
+        const tl = height[i], tr = height[i + 1], bl = height[i + gw], br = height[i + gw + 1];
+        let mn = tl, mx = tl;
+        if (tr < mn) mn = tr; if (tr > mx) mx = tr;
+        if (bl < mn) mn = bl; if (bl > mx) mx = bl;
+        if (br < mn) mn = br; if (br > mx) mx = br;
+        const x0 = cc * CELL, y0 = r * CELL, x1 = x0 + CELL, y1 = y0 + CELL;
+        for (let li = 0; li < levels.length; li++) {
+          const L = levels[li];
+          if (L < mn) continue;
+          if (L > mx) break; // levels ascending
+          let n = 0;
+          if ((tl - L) * (tr - L) < 0) { ex[n] = x0 + (L - tl) / (tr - tl) * CELL; ey[n] = y0; n++; }
+          if ((tr - L) * (br - L) < 0) { ex[n] = x1; ey[n] = y0 + (L - tr) / (br - tr) * CELL; n++; }
+          if ((bl - L) * (br - L) < 0) { ex[n] = x0 + (L - bl) / (br - bl) * CELL; ey[n] = y1; n++; }
+          if ((tl - L) * (bl - L) < 0) { ex[n] = x0; ey[n] = y0 + (L - tl) / (bl - tl) * CELL; n++; }
+          const p = paths[li];
+          if (n === 2) {
+            p.moveTo(ex[0], ey[0]); p.lineTo(ex[1], ey[1]);
+          } else if (n === 4) {
+            p.moveTo(ex[0], ey[0]); p.lineTo(ex[1], ey[1]);
+            p.moveTo(ex[2], ey[2]); p.lineTo(ex[3], ey[3]);
+          }
+        }
+      }
     }
-    g.putImageData(img, 0, 0);
+
+    // paint: warm paper, sepia contours darkening with elevation
+    g.fillStyle = '#efe9db';
+    g.fillRect(0, 0, W, H);
+    g.lineWidth = 1;
+    g.lineJoin = 'round';
+    for (let li = 0; li < paths.length; li++) {
+      const frac = levels[li] / HMAX;
+      g.strokeStyle = `rgba(74, 56, 38, ${0.14 + 0.5 * frac})`;
+      g.stroke(paths[li]);
+    }
   }
   requestAnimationFrame(frame);
 }
